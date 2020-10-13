@@ -13,7 +13,9 @@ import com.example.reubroretrofit.network.RetrofitInstance;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import retrofit2.Call;
@@ -27,8 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       // Toolbar toolbar = findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+
 
         /** Create handle for the RetrofitInstance interface*/
         GetNoticeDataService service = RetrofitInstance.getRetrofitInstance().create(GetNoticeDataService.class);
@@ -53,15 +54,35 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Something went wrong...Error message: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
+
     }
 
     /** Method to generate List of notice using RecyclerView with custom adapter*/
-    private void generateNoticeList(List<Notice> noticeList) {
+    private void generateNoticeList(final List<Notice> noticeList) {
         RecyclerView recyclerView = findViewById(R.id.recycler_view_notice_list);
-        NoticeAdapter adapter = new NoticeAdapter(noticeList);
+        final NoticeAdapter adapter = new NoticeAdapter(noticeList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                noticeList.remove(viewHolder.getAdapterPosition());
+                adapter.notifyDataSetChanged();
+
+
+            }
+        }).attachToRecyclerView(recyclerView);
     }
 
 /*
